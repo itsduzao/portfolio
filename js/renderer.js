@@ -47,8 +47,8 @@ const buildSkillItem = ({ id, name, icon }) => /* html */ `
  * @returns {string}
  */
 const buildSkillCard = ({ id, title, skills }) => /* html */ `
-  <article class="skill-card" role="listitem" aria-labelledby="skill-cat-${id}">
-    <h3 id="skill-cat-${id}" class="skill-card__title">${title}</h3>
+  <article class="skill-card" role="listitem" aria-labelledby="skill-category-${id}">
+    <h3 id="skill-category-${id}" class="skill-card__title">${title}</h3>
     <ul class="skill-card__list" role="list" aria-label="Habilidades: ${title}">
       ${skills.map(buildSkillItem).join("")}
     </ul>
@@ -71,7 +71,7 @@ const buildProjectCard = ({
   imageAlt,
 }) => {
   const tagsMarkup = stack
-    .map(tech => `<li class="tag" role="listitem">${tech}</li>`)
+    .map(technology => `<li class="tag" role="listitem">${technology}</li>`)
     .join("");
 
   const fallbackUrl = `https://placehold.co/672x512/e5e7eb/9ca3af?text=${encodeURIComponent(title)}`;
@@ -85,7 +85,7 @@ const buildProjectCard = ({
         width="336"
         height="256"
         loading="lazy"
-        onerror="this.src='${fallbackUrl}'"
+        onerror="this.onerror='null'; this.src='${fallbackUrl}'"
       />
       <div class="project-card__body">
         <h3 id="project-${id}" class="project-card__title">${title}</h3>

@@ -67,12 +67,31 @@ const initScrollTop = scrollTopButton => {
 // ─────────────────────────────────────────────
 
 /**
- * Highlights the nav link that corresponds to the section
- * currently visible in the viewport via IntersectionObserver.
+ * Highlights the nav link that corresponds to the section currently in view.
+ *
+ * Strategy: on every scroll event, read the live bounding rect of each section
+ * and mark as active the last one whose top edge has crossed the activation line.
+ * This is deterministic at any viewport width and requires no recalculation on
+ * resize, unlike IntersectionObserver with percentage-based rootMargins.
+ *
  * @param {NodeListOf<HTMLElement>} navLinks
- * @returns {() => void} cleanup fn (disconnects observer)
+ * @returns {() => void} cleanup fn that removes the scroll event listener
  */
 const initActiveNav = navLinks => {
+  // ── Named constants (no magic numbers) ──────────────────────────────────────
+
+  /** Fallback header height used only when the element cannot be measured yet. */
+  const FALLBACK_HEADER_HEIGHT_PX = 61;
+
+  /**
+   * Extra breathing room (px) added below the header's bottom edge before a
+   * section is considered "entered". Prevents the active link from flipping
+   * exactly when the section border touches the header.
+   */
+  const SECTION_ACTIVATION_BUFFER_PX = 8;
+
+  // ── Collect target sections ──────────────────────────────────────────────────
+
   const sectionIds = Array.from(navLinks)
     .map(link => link.getAttribute("href")?.replace("#", ""))
     .filter(Boolean);
@@ -83,26 +102,74 @@ const initActiveNav = navLinks => {
 
   if (!sections.length) return () => {};
 
-  const observer = new IntersectionObserver(
-    entries => {
-      entries.forEach(({ target, isIntersecting }) => {
-        if (!isIntersecting) return;
-        const activeHref = `#${target.id}`;
-        navLinks.forEach(link => {
-          const isCurrent = link.getAttribute("href") === activeHref;
-          link.setAttribute("aria-current", isCurrent ? "page" : "false");
-        });
-      });
-    },
-    { rootMargin: "-40% 0px -55% 0px", threshold: 0 },
-  );
+  const headerElement = document.querySelector(".site-header");
 
-  sections.forEach(section => observer.observe(section));
+  // ── Helpers ──────────────────────────────────────────────────────────────────
 
-  // Set initial active state
-  navLinks[0]?.setAttribute("aria-current", "page");
+  /**
+   * Returns the pixel Y-position of the lowest visible UI element that
+   * covers the top of the page content (sticky header + open mobile menu).
+   * Reading this on every scroll ensures the open hamburger menu is
+   * accounted for without any setup-time snapshot.
+   * @returns {number}
+   */
+  const getMobileMenuAwareHeaderBottom = () => {
+    const headerBottom =
+      headerElement?.getBoundingClientRect().bottom ??
+      FALLBACK_HEADER_HEIGHT_PX;
 
-  return () => observer.disconnect();
+    // When the hamburger menu is open it overlays the page content, so the
+    // effective "covered" area extends to the bottom of the open nav list.
+    const openMobileNavList = document.querySelector(".nav__links.is-open");
+    if (openMobileNavList) {
+      return openMobileNavList.getBoundingClientRect().bottom;
+    }
+
+    return headerBottom;
+  };
+
+  /**
+   * Determines which section is currently active by finding the last section
+   * whose top edge has crossed the activation line (header bottom + buffer).
+   * Falls back to the first section when scrolled all the way to the top.
+   * @returns {string} The id of the active section.
+   */
+  const getActiveSectionId = () => {
+    const activationLine =
+      getMobileMenuAwareHeaderBottom() + SECTION_ACTIVATION_BUFFER_PX;
+
+    let activeSectionId = sections[0]?.id ?? "";
+
+    for (const section of sections) {
+      const { top } = section.getBoundingClientRect();
+      if (top <= activationLine) {
+        activeSectionId = section.id;
+      }
+    }
+
+    return activeSectionId;
+  };
+
+  /**
+   * Updates aria-current on every nav link to reflect the active section.
+   * @param {string} activeSectionId
+   */
+  const setActiveLink = activeSectionId => {
+    const activeHref = `#${activeSectionId}`;
+    navLinks.forEach(link => {
+      const isCurrent = link.getAttribute("href") === activeHref;
+      link.setAttribute("aria-current", isCurrent ? "page" : "false");
+    });
+  };
+
+  const handleScroll = () => setActiveLink(getActiveSectionId());
+
+  // Set initial state before the user scrolls
+  setActiveLink(sections[0]?.id ?? "");
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+
+  return () => window.removeEventListener("scroll", handleScroll);
 };
 
 // ─────────────────────────────────────────────

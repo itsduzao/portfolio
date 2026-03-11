@@ -31,12 +31,21 @@ const arrowUpRightIcon = () => /* html */ `
 
 /**
  * Builds the HTML markup for a single skill item.
- * @param {{ id: string, name: string, icon: string }} skill
+ * @param {{ id: string, name: string, icon: string, iconVariant: 'brand' | 'outline' }} skill
  * @returns {string}
  */
-const buildSkillItem = ({ id, name, icon }) => /* html */ `
+const buildSkillItem = ({ id, name, icon, iconVariant }) => /* html */ `
   <li class="skill-item" role="listitem">
-    <span class="skill-item__icon" aria-hidden="true">${icon}</span>
+    <span class="skill-item__icon skill-item__icon--${iconVariant}">
+      <img
+        src="${icon}"
+        alt=""
+        width="28"
+        height="28"
+        aria-hidden="true"
+        loading="lazy"
+      />
+    </span>
     <span class="skill-item__name">${name}</span>
   </li>
 `;

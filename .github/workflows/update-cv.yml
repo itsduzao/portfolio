@@ -1,0 +1,64 @@
+name: Update CV from Google Drive
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # toda segunda-feira às 09h UTC
+  workflow_dispatch: # permite rodar manualmente também
+
+jobs:
+  update-cv:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download CV from Google Drive
+        run: |
+          FILE_ID="${{ secrets.GDRIVE_FILE_ID }}"
+          OUTPUT="CV-Eduardo-H-L-Silva.pdf"
+
+          curl -L "https://drive.google.com/uc?export=download&id=${FILE_ID}" \
+            -o "${OUTPUT}"
+
+          # Verifica se o download foi bem sucedido
+          if [ ! -s "${OUTPUT}" ]; then
+            echo "Falha ao baixar o arquivo"
+            exit 1
+          fi
+
+      - name: Check if file changed
+        id: check_change
+        run: |
+          FILE="CV-Eduardo-H-L-Silva.pdf"
+          NEW_HASH=$(md5sum "$FILE" | awk '{print $1}')
+
+          # Busca hash da última release
+          LAST_HASH=$(gh release view latest --json body -q '.body' 2>/dev/null | grep 'md5:' | awk '{print $2}' || echo "none")
+
+          echo "new_hash=${NEW_HASH}" >> $GITHUB_OUTPUT
+          echo "last_hash=${LAST_HASH}" >> $GITHUB_OUTPUT
+
+          if [ "$NEW_HASH" = "$LAST_HASH" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create new Release
+        if: steps.check_change.outputs.changed == 'true'
+        run: |
+          DATE=$(date +'%Y.%m.%d')
+          TAG="cv-${DATE}-${{ github.run_number }}"
+          HASH="${{ steps.check_change.outputs.new_hash }}"
+
+          gh release create "$TAG" \
+            "CV-Eduardo-H-L-Silva.pdf" \
+            --title "Currículo $DATE" \
+            --notes "Atualização automática do currículo.
+          md5: ${HASH}" \
+            --latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -197,34 +197,34 @@ export const projects = [
     description:
       "Oldagram é uma aplicação web inspirada no Instagram, mas com um toque vintage dos anos 1900.",
     stack: ["Javascript", "HTML", "CSS", "WAI-ARIA", "Figma"],
-    ctaLabel: "Acessar Aplicação",
+    ctaLabel: "Ver Demo",
     ctaUrl: "https://itsduzao.github.io/oldagram/",
     imageUrl: "assets/images/projects/oldagram-preview.png",
-    imageAlt: "Interface do Oldagram mostrando um feed com publicações",
+    imageAlt: "Interface do Oldagram mostrando um feed com publicações.",
   },
   {
-    id: "finance-app",
-    title: "Aplicativo Mobile de Finanças",
+    id: "password-generator",
+    title: "Gerador de Senhas",
     description:
-      "Design UI focado na conversão e retenção de usuários com fluxos simplificados e amigáveis.",
-    stack: ["SwiftUI", "Figma", "Notion"],
-    ctaLabel: "Ver Demonstração ao Vivo",
-    ctaUrl: "#",
-    imageUrl: "assets/images/project-finance.jpg",
+      "Um gerador de senhas com interface amigável e opções personalizáveis de caracteres.",
+    stack: ["Javascript", "Figma", "HTML5", "CSS", "WAI-ARIA"],
+    ctaLabel: "Ver Demo",
+    ctaUrl: "https://itsduzao.github.io/password-generator/",
+    imageUrl: "assets/images/projects/password-generator-preview.png",
     imageAlt:
-      "Telas do aplicativo mobile de finanças exibindo gráficos e transações",
+      "Tela da aplicação mostrando opções customizadas para gerar senha.",
   },
   {
-    id: "design-system",
-    title: "Sistema de Design Unificado",
+    id: "component-library",
+    title: "Biblioteca de Componentes",
     description:
-      "Criação de componentes escaláveis seguindo diretrizes WCAG 2.1 AA para acessibilidade.",
-    stack: ["Storybook", "React", "Sass"],
-    ctaLabel: "Acessar Repositório",
-    ctaUrl: "#",
-    imageUrl: "assets/images/project-design-system.jpg",
+      "Uma biblioteca de componentes React moderna, acessível e totalmente testada.",
+    stack: ["React", "Typescript", "Storybook", "Vite", "Vitest"],
+    ctaLabel: "Acessar Documentação",
+    ctaUrl: "https://itsduzao.github.io/component-library",
+    imageUrl: "assets/images/projects/component-library-preview.png",
     imageAlt:
-      "Biblioteca de componentes do Sistema de Design Unificado no Storybook",
+      "Imagem mostrando uma documentação visual da biblioteca de componentes",
   },
 ];
 

@@ -52,7 +52,7 @@ jobs:
       - name: Create new Release
         if: steps.check_change.outputs.changed == 'true'
         run: |
-          DATE=$(date +'%Y.%m.%d')
+          DATE=$(date + '%d/%m/%Y')
           TAG="cv-${DATE}-${{ github.run_number }}"
           HASH="${{ steps.check_change.outputs.new_hash }}"
 
